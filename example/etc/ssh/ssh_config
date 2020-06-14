@@ -1,0 +1,334 @@
+###
+ # /etc/ssh/ssh_config - OpenSSH SSH client configuration file
+ #
+ # @copyright Copyright 2018 Quoin, Inc.
+ ##
+
+Include /etc/ssh/ssh_local_config
+
+###
+ # @defgroup configuration error checking
+ #
+ #@{
+
+  # @defgroup not set
+  IgnoreUnknown="none"
+
+##@}
+
+
+###
+ # @defgroup network
+ #
+ #@{
+
+  # @default Port 22
+  Port="22"
+
+  # @default AddressFamily any
+  AddressFamily="inet"
+
+  # @default ConnectionAttempts 1
+  ConnectionAttempts="1"
+
+  # @default SyslogFacility USER
+  SyslogFacility="USER"
+
+  # @default LogLevel DEBUG
+  LogLevel="INFO"
+
+##@}
+
+
+###
+ # @defgroup crypto
+ #
+ #@{
+
+  # @default FingerprintHash sha256
+  FingerprintHash="sha256"
+
+  # @default KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256,diffie-hellman-group14-sha1
+  KexAlgorithms="curve25519-sha256@libssh.org"
+
+  # @default Ciphers chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+  #
+  # chacha20 is a stream cipher uses Poly1305 for authentication making a MAC
+  # unnecessary.
+  Ciphers="chacha20-poly1305@openssh.com"
+
+  # @default MACs umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+  # This should be unset or set to empty but that syntax is not supported.
+  MACs="hmac-sha2-512-etm@openssh.com"
+
+  # @default CASignatureAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  CASignatureAlgorithms="ssh-ed25519"
+
+  # @default RekeyLimit 0 0
+  RekeyLimit default="none"
+
+  # @default not set
+  RevokedHostKeys="/etc/ssh/revoked_keys"
+
+##@}
+
+
+###
+ # @defgroup host authentication
+ #
+ #@{
+
+  # @default HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  HostKeyAlgorithms="rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-256"
+
+  # @default HostbasedKeyTypes ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  HostbasedKeyTypes="rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-256"
+
+
+  # @default CanonicalizeFallbackLocal yes
+  #
+  # Fail immediately if target hostname cannot be found in any of the domains.
+  CanonicalizeFallbackLocal="no"
+
+  # @default CanonicalizeHostname false
+  CanonicalizeHostname="no"
+
+  # @default CanonicalDomains
+  CanonicalDomains=
+
+  # @default CanonicalizeMaxDots 1
+  CanonicalizeMaxDots="1"
+
+  # @default not set
+  CanonicalizePermittedCNAMEs=
+
+  # @default CheckHostIP yes
+  CheckHostIP="yes"
+
+  # @default GlobalKnownHostsFile /etc/ssh/ssh_known_hosts /etc/ssh/ssh_known_hosts2
+  GlobalKnownHostsFile="/etc/ssh/ssh_known_hosts"
+
+  # @default UserKnownHostsFile ~/.ssh/known_hosts ~/.ssh/known_hosts2
+  UserKnownHostsFile="~/.ssh/known_hosts"
+
+  # @default HashKnownHosts no
+  HashKnownHosts="yes"
+
+  # @default StrictHostKeyChecking ask
+  StrictHostKeyChecking="yes"
+
+  # @default BatchMode no
+  BatchMode="no"
+
+  # @default NoHostAuthenticationForLocalhost no
+  NoHostAuthenticationForLocalhost="no"
+
+  # @default VerifyHostKeyDNS false
+  #
+  # This requires DNS with SSHFP records and DNSSEC. It takes precedence over
+  # certificates which provides the same level of host authentication. We need
+  # to discover how to require both.
+  VerifyHostKeyDNS="ask"
+
+  # @default VisualHostKey no
+  VisualHostKey="no"
+
+  # @default UpdateHostKeys false
+  UpdateHostKeys="no"
+
+##@}
+
+
+###
+ # @defgroup user authentication
+ #
+ #@{
+
+  # @default not set
+  PreferredAuthentications="none"
+
+  # @default PubkeyAuthentication yes
+  PubkeyAuthentication="no"
+
+  # @default IdentitiesOnly no
+  #
+  # Ideally we would set this to yes but it disables use of the GnuPG agent.
+  IdentitiesOnly="no"
+
+  # This has no default.
+  IdentityAgent="SSH_AUTH_SOCK"
+
+  # @default IdentityFile ~/.ssh/id_rsa
+  # @default IdentityFile ~/.ssh/id_dsa
+  # @default IdentityFile ~/.ssh/id_ecdsa
+  # @default IdentityFile ~/.ssh/id_ed25519
+  # @default IdentityFile ~/.ssh/id_xmss
+  #
+  # This must match the CertificateFile option.
+  #
+  IdentityFile="~/.ssh/id_rsa"
+
+  # This has no default.
+  CertificateFile="~/.ssh/id_rsa-cert.pub"
+
+  # @default PubkeyAcceptedKeyTypes ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  #
+  # We require both the certificate and key type.
+  #
+  PubkeyAcceptedKeyTypes="rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-256"
+
+  # @default HostbasedAuthentication no
+  HostbasedAuthentication="no"
+
+  # @default ChallengeResponseAuthentication yes
+  ChallengeResponseAuthentication="no"
+
+  # @default KbdInteractiveAuthentication yes
+  KbdInteractiveAuthentication="no"
+
+  # @default PasswordAuthentication yes
+  PasswordAuthentication="no"
+
+  # @default NumberOfPasswordPrompts 3
+  #
+  # This impacts both passwords and public keys. Setting this to 0 will require
+  # that public keys be already in the agent.
+  NumberOfPasswordPrompts="0"
+  #NumberOfPasswordPrompts="1"
+
+  # @default GSSAPIAuthentication no
+  GSSAPIAuthentication="no"
+
+  # @default GSSAPIDelegateCredentials no
+  GSSAPIDelegateCredentials="no"
+
+  # @default EnableSSHKeysign no
+  EnableSSHKeysign="no"
+
+  # @default not set
+  #
+  # We rely on gpg-agent using OpenPGP Card standard instead of PKCS11.
+  # This should be unset or set to empty but that syntax is not supported.
+  # PKCS11Provider
+
+  # @default AddKeysToAgent false
+  #
+  # Do not add keys automatically to agent. We have a policy of explicitly
+  # adding keys.
+  AddKeysToAgent="no"
+
+  # @default BatchMode no
+  BatchMode="no"
+
+##@}
+
+
+###
+ # @defgroup session
+ #
+ #@{
+
+  # @default TCPKeepAlive yes
+  TCPKeepAlive="no"
+
+  # @default ServerAliveCountMax 3
+  ServerAliveCountMax="3"
+
+  # @default ServerAliveInterval 0
+  ServerAliveInterval="10"
+
+  # @default ConnectTimeout none
+  #ConnectTimeout="10"
+  ConnectTimeout=0
+
+  # @default ControlMaster false
+  ControlMaster="no"
+
+  # @default ControlPersist no
+  ControlPersist="no"
+
+  # @default Compression yes
+  Compression="yes"
+
+  # @default Tunnel false
+  Tunnel="no"
+
+  # @default TunnelDevice any:any
+  TunnelDevice="any:any"
+
+  # @default GatewayPorts no
+  GatewayPorts="no"
+
+  # @default ClearAllForwardings no
+  #
+  # This must be disabled to support port forwarding.
+  ClearAllForwardings="no"
+
+  # @default ExitOnForwardFailure no
+  ExitOnForwardFailure="yes"
+
+  # @default ForwardAgent no
+  #
+  # Do not enable. Use ProxyCommand and ProxyJump as alternative.
+  ForwardAgent="no"
+
+  # @default ForwardX11 no
+  ForwardX11="no"
+
+  # @default ForwardX11Trusted yes
+  ForwardX11Trusted="no"
+
+  # @default ForwardX11Timeout 1200
+  ForwardX11Timeout="1"
+
+  # @default XAuthLocation /usr/bin/xauth
+  XAuthLocation="/usr/bin/xauth"
+
+  # @default PermitLocalCommand no
+  PermitLocalCommand="no"
+
+  # @default not set
+  # This should be unset or set to empty but that syntax is not supported.
+  # RemoteCommand
+
+  # @default not set
+  # This should be unset or set to empty but that syntax is not supported.
+  # RemoteForward
+
+  # @default not set
+  # This should be unset or set to empty but that syntax is not supported.
+  # ProxyCommand
+
+  # @default not set
+  # This should be unset or set to empty but that syntax is not supported.
+  # ProxyJump
+
+  # @default ProxyUseFdpass no
+  ProxyUseFdpass="no"
+
+  # @default not set
+  SendEnv=""
+
+  # @default not set
+  SetEnv=""
+
+  # @default RequestTTY auto
+  RequestTTY="auto"
+
+  # @default StreamLocalBindUnlink no
+  StreamLocalBindUnlink="no"
+
+  # @default StreamLocalBindMask 0177
+  StreamLocalBindMask="0177"
+
+  # @default IPQoS af21 cs1
+  IPQoS="af21" "cs1"
+
+  # @default EscapeChar ~
+  EscapeChar="~"
+
+  # @default UseRoaming <unknown>
+  # This is an undocumented feature. It's not clear if it is necessary.
+  UseRoaming="no"
+
+##@}

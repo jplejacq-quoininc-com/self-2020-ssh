@@ -1,0 +1,383 @@
+###
+ # /etc/ssh/sshd_config - OpenSSH SSH daemon configuration file
+ #
+ # @copyright Copyright 2018 Quoin, Inc.
+ ##
+
+###
+ # @defgroup Daemon
+ #
+ #@{
+
+  # @default Port 22
+  Port="22"
+
+  # @default AddressFamily any
+  AddressFamily="inet"
+
+  # @default ListenAddress 0.0.0.0:22
+  # @default ListenAddress [::]:22
+  # Value cannot be in quotes.
+  # ListenAddress=127.0.0.1:22
+  ListenAddress 0.0.0.0:22
+
+  # @default RDomain none
+  #
+  # This is a BSD specific feature not available in Linux.
+  #
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default PidFile /run/sshd.pid
+  PidFile="/run/sshd.pid"
+
+  # @default StreamLocalBindMask 0177
+  StreamLocalBindMask="0177"
+
+  # @default IPQoS af21 cs1
+  IPQoS="af21" "cs1"
+
+  # @default GatewayPorts no
+  GatewayPorts="no"
+
+  # @default MaxStartups 10:30:100
+  MaxStartups="10:30:100"
+
+  # @default SyslogFacility AUTH
+  SyslogFacility="AUTH"
+
+  # @default LogLevel DEBUG
+  LogLevel="INFO"
+
+  # @default FingerprintHash sha256
+  FingerprintHash="sha256"
+
+  # @default Subsystem none
+  Subsystem sftp internal-sftp
+
+  # @default XAuthLocation /usr/bin/xauth
+  XAuthLocation="/usr/bin/xauth"
+
+##@}
+
+
+###
+ # @defgroup Crypto
+ #
+ #@{
+
+  # @default KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256,diffie-hellman-group14-sha1
+  KexAlgorithms="curve25519-sha256@libssh.org"
+
+  # @default Ciphers chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+  #
+  # chacha20 is a stream cipher that uses Poly1305 for authentication
+  # making a MAC unnecessary.
+  Ciphers="chacha20-poly1305@openssh.com"
+
+  # @default MACs umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+  # This should be unset or set to empty but that syntax is not supported.
+  MACs="hmac-sha2-512-etm@openssh.com"
+
+##@}
+
+
+###
+ # @defgroup Server Authentication
+ #
+ #@{
+
+  # @default HostKeyAlgorithms ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  HostKeyAlgorithms="rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-256"
+
+  # @default HostKey /etc/ssh/ssh_host_rsa_key
+  # @default HostKey /etc/ssh/ssh_host_ecdsa_key
+  # @default HostKey /etc/ssh/ssh_host_ed25519_key
+  HostKey="/etc/ssh/ssh_host_rsa_key"
+
+  # @default HostCertificate none
+  HostCertificate="/etc/ssh/ssh_host_rsa_key-cert.pub"
+
+##@}
+
+
+###
+ # @defgroup User Authentication
+ #
+ #@{
+
+  # @default AuthenticationMethods any
+  #
+  # In the Match section we enable only the methods desired.
+  AuthenticationMethods="none"
+
+  # @default PubkeyAuthentication yes
+  #
+  # This will be enabled later in the Match sections.
+  #
+  PubkeyAuthentication="no"
+
+  # @default PubkeyAcceptedKeyTypes ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  #
+  # We require both the certificate and key type.
+  #
+  PubkeyAcceptedKeyTypes="rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-256"
+
+  # @default AuthorizedKeysCommand none
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default AuthorizedKeysCommandUser none
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default AuthorizedKeysFile .ssh/authorized_keys .ssh/authorized_keys2
+  AuthorizedKeysFile="none"
+
+  # @default RevokedKeys none
+  RevokedKeys="/etc/ssh/revoked_keys"
+
+  # @default TrustedUserCAKeys none
+  TrustedUserCAKeys="/etc/ssh/ca_keys"
+
+  # @default CASignatureAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  CASignatureAlgorithms="ssh-ed25519"
+
+  # @default AuthorizedPrincipalsFile none
+  # We use the username of the user in a certificate's principals list.
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default AuthorizedPrincipalsCommand none
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default AuthorizedPrincipalsCommandUser none
+  # This should be unset or set to empty but that syntax is not supported.
+
+
+  # @default PasswordAuthentication yes
+  PasswordAuthentication="no"
+
+  # @ default PermitEmptyPasswords no
+  PermitEmptyPasswords="no"
+
+
+  # @default ChallengeResponseAuthentication yes
+  ChallengeResponseAuthentication="no"
+
+  # @default KbdInteractiveAuthentication yes
+  KbdInteractiveAuthentication="no"
+
+
+  # @default KerberosAuthentication no
+  KerberosAuthentication="no"
+
+  # @default KerberosOrLocalPasswd yes
+  KerberosOrLocalPasswd="no"
+
+  # @default KerberosTicketCleanup yes
+  KerberosTicketCleanup="yes"
+
+
+  # @default GSSAPIAuthentication no
+  GSSAPIAuthentication="no"
+
+  # @default GSSAPIKeyExchange no
+  GSSAPIKeyExchange="no"
+
+  # @default GSSAPICleanupCredentials yes
+  GSSAPICleanupCredentials="yes"
+
+  # @default GSSAPIStrictAcceptorCheck yes
+  GSSAPIStrictAcceptorCheck="yes"
+
+  # @default GSSAPIStoreCredentialsOnRekey no
+  GSSAPIStoreCredentialsOnRekey="no"
+
+
+  # @default HostbasedAuthentication no
+  HostbasedAuthentication="no"
+
+  # @default HostbasedUsesNameFromPacketOnly no
+  HostbasedUsesNameFromPacketOnly="no"
+
+  # @default HostbasedAcceptedKeyTypes ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-ed25519,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+  HostbasedAcceptedKeyTypes="rsa-sha2-256-cert-v01@openssh.com,rsa-sha2-256"
+
+  # @default IgnoreRhosts yes
+  IgnoreRhosts="yes"
+
+  # @default IgnoreUserKnownHosts no
+  IgnoreUserKnownHosts="yes"
+
+
+  # @default LoginGraceTime 120
+  LoginGraceTime="120"
+
+  # @default MaxAuthTries 6
+  #
+  # This requires that ssh_config only defines a single identify file and
+  # certificate file.
+  MaxAuthTries="1"
+
+
+  ##
+  # Allow only group based authentication. The following directives are search
+  # in the order DenyUsers, AllowUsers, DenyGroups, AllowGroups.
+  #
+  # @default AllowGroups ""
+  AllowGroups="qisshusr"
+
+  # @default PermitRootlogin without-password
+  PermitRootLogin="no"
+
+
+  # @default ExposeAuthInfo no
+  ExposeAuthInfo="no"
+
+
+  # @default UseDNS no
+  #
+  # This must be enabled to use certificates which are hostname based, not
+  # IP address.
+  UseDNS="yes"
+
+# ##@}
+
+
+###
+ # @defgroup Session
+ #
+ #@{
+
+  # @default Banner none
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default DebianBanner yes
+  DebianBanner="yes"
+
+
+  # @default VersionAddendum none
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default LoginGraceTime 120
+  LoginGraceTime="120"
+
+  # @default ClientAliveInterval 0
+  #
+  # Enable keep alive by requesting a response for the client.
+  #
+  ClientAliveInterval="15"
+
+  # @default ClientAliveCountMax 3
+  #
+  # Use this in preference to TCPKeepAlive since the messages are sent through
+  # the encrypted channel.
+  #
+  ClientAliveCountMax="2"
+
+  # @default TCPKeepAlive yes
+  #
+  # We use the ClientAlive in preference this.
+  #
+  TCPKeepAlive="no"
+
+
+  # @default ChrootDirectory none
+  # This should be unset or set to empty but that syntax is not supported.
+
+  # @default MaxSessions 10
+  #
+  # This number is sufficient for a small machine.
+  #
+  MaxSessions="2"
+
+  # @default StrictModes yes
+  StrictModes="yes"
+
+
+  # @default AcceptEnv none
+  AcceptEnv="LANG LC_*"
+
+  # @default PermitUserEnvironment no
+  PermitUserEnvironment="no"
+
+  # @default PermitTTY yes
+  PermitTTY="yes"
+
+  # @default PermitUserRC yes
+  PermitUserRC="no"
+
+  # @default X11DisplayOffset 10
+  X11DisplayOffset="10"
+
+  # @default X11Forwarding no
+  X11Forwarding="no"
+
+  # @default X11UseLocalhost yes
+  X11UseLocalhost="yes"
+
+
+  # @default GatewayPorts no
+  GatewayPorts="no"
+
+
+  # @default PermitOpen any
+  PermitOpen=none
+
+  # @default PermitListen any
+  PermitListen=none
+
+  # @default DisableForwarding no
+  DisableForwarding="yes"
+
+  # @default AllowTcpForwarding yes
+  AllowTcpForwarding="no"
+
+  # @default AllowAgentForwarding yes
+  AllowAgentForwarding="no"
+
+  # @default AllowStreamLocalForwarding yes
+  AllowStreamLocalForwarding="no"
+
+  # @default StreamLocalBindUnlink no
+  StreamLocalBindUnlink="no"
+
+  # @default PermitTunnel no
+  PermitTunnel="no"
+
+
+  # @default usepam no
+  UsePam="yes"
+
+  # @default PrintMotd yes
+  # Rely on PAM for MOTD.
+  PrintMotd="no"
+
+  # @default PrintLastLog yes
+  PrintLastLog="yes"
+
+
+  # @default Compression yes
+  #
+  # Yes is now equivalent to delay which is considered legacy. Compression is
+  # done after encryption.
+  #
+  Compression="no"
+
+  # @default RekeyLimit 0 0
+  RekeyLimit="0" "0"
+
+  # @default ForceCommand none
+  # Value cannot be in quotes.
+  ForceCommand=none
+
+  # @default HostKeyAgent none
+  # This should be unset or set to empty but that syntax is not supported.
+
+##@}
+
+
+###
+ # Match localhost and quoininc hosts only
+ ##
+
+Match Host localhost,*.quoininc.com
+  AuthenticationMethods="publickey"
+  PubkeyAuthentication="yes"

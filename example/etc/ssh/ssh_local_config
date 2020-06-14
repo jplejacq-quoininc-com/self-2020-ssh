@@ -1,0 +1,14 @@
+###
+ # @file com.quoininc ssh configuration
+ #
+ # This will normally contain enable public key authentication and host key
+ # aliasing. Only change if you know what you are doing and ask for a security
+ # review.
+ ##
+
+Host localhost qir9rgyf8 *.quoininc.com
+  PreferredAuthentications="publickey"
+  PubkeyAuthentication="yes"
+
+Host localhost qir9rgyf8
+  HostKeyAlias="qir9rgyf8.quoininc.com"

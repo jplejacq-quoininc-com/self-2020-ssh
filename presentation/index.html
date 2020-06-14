@@ -1,0 +1,604 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Modern SSH Security: Best Practices</title>
+<!-- metadata -->
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20200614" />
+<meta name="author" content="Jean Pierre LeJacq" />
+<meta name="company" content="Quoin Inc" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+
+<style type="text/css">
+  table {
+    width: 100%;
+  }
+
+  td, th {
+    border-style: solid;
+    border-width: 1px;
+  }
+</style>
+
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="layout">
+  <div id="controls"><!-- DO NOT EDIT --></div>
+  <div id="currentSlide"><!-- DO NOT EDIT --></div>
+  <div id="header"></div>
+  <div id="footer">
+    <h1>Quoin, Inc. | 2020-jun-13</h1>
+    <h2>Modern SSH Security: Best Practices</h2>
+  </div>
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+  <h1>Modern SSH Security: Best Practices</h1>
+  <h3>Jean Pierre LeJacq</h3>
+  <h4>Quoin Inc</h4>
+  <p>
+    email: jeanpierre.lejacq@quoininc.com
+    presentation: https://github.com/jplejacq/self-2020-ssh
+  </p>
+</div>
+<div class="handout">
+  <p>
+    OpenSSH is ubiquitous in the open source community for devops and
+    development.  It is unfortunately also one of the most common
+    attack vectors. We present modern OpenSSH features for securing
+    connections that are rarely used and poorly understood. We also
+    give guidance on configuring the client and server to enhance the
+    value of these features. We also demonstrate compliance with NIST
+    SSH guidelines. This is the one of the simplest things you can do
+    to secure your infrastructure.
+  </p>
+
+  <ul>
+    <li>
+      OpenSSH certificates to simplify credential management.
+    </li>
+
+    <li>
+      Certificates and DNSSEC SSHFP to eliminate man-in-the-middle attacks.
+    </li>
+
+    <li>
+      Matching patterns for enhanced access control.
+    </li>
+
+    <li>
+      Integration of OpenSSH and GnuPG authentication keys.
+    </li>
+
+    <li>
+      Storage of keys on hardware security tokens using GnuPG and the
+      brand new FIDO2 capability.
+    </li>
+
+    <li>
+      Optimal Cryptographic selection including the new quantum
+      computing resistant keys.
+    </li>
+  </ul>
+
+  <p>
+    Jean Pierre is a founding partner of Quoin, Inc., a consulting
+    company specializing in open-source software. Jean Pierre has over
+    25 year experience in software development and DevOps, focusing on
+    security best practices. He has presented numerous times at <abbr
+    title="SouthEast Linux">SELF</abbr> on a wide range of topics.
+  </p>
+</div>
+
+
+<div class="slide">
+  <h1>Topics</h1>
+
+  <ol>
+    <li>Vulnerabilities</li>
+    <li>Configuration</li>
+    <li>Crypto</li>
+    <li>Authentication</li>
+    <li>Hardware security tokens</li>
+    <li>References</li>
+  </ol>
+</div>
+
+
+<div class="slide">
+  <h1>Introduction</h1>
+
+  <p>
+    <img style="float: right;" src="openssh-logo.png" alt=""/> <a
+    href="https://www.openssh.com">OpenSSH</a> (OpenBSD Secure Shell)
+    first released in 1999 as fork of Tatu Ylönen's SSH.
+  </p>
+
+  <h2>
+    Functionality
+  </h2>
+
+  <ul>
+    <li>Remote access</li>
+    <li>Remote copy using scp (deprecated) and sftp</li>
+    <li>Remote execution</li>
+    <li>Port forwarding</li>
+    <li>SOCKS proxy</li>
+    <li>Agent forwarding (deprecated) and ProyJump</li>
+    <li>Whole ecco system built on top of OpenSSH</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Security guidelines and standards</h1>
+
+  <p>
+    NIST has excellent resources on vulnerabilities
+  </p>
+
+  <ul>
+    <li>
+      <a
+      href="https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=openssh">CVE</a>
+      related to OpenSSH.
+    </li>
+
+    <li>
+      <a
+      href="https://nvlpubs.nist.gov/nistpubs/ir/2015/NIST.IR.7966.pdfz">NISTTR
+      7966 - Security of Interactive and Automated Access Management
+      Using Secure Shell (SSH)</a>
+    </li>
+
+    <li>
+      <a href="https://nvd.nist.gov/800-53">NIST SP 800-53 Recommended
+      Security Controls</a>
+    </li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Vulnerabilities</h1>
+
+  <p>
+    Vulnerability is generally related to SSH based access (<a
+    href="https://nvlpubs.nist.gov/nistpubs/ir/2015/NIST.IR.7966.pdf">NISTIR
+    7966</a>).
+  </p>
+
+  <ul>
+    <li>Vulnerable SSH implementation</li>
+    <li>Improperly configured access controls</li>
+    <li>Stolen, leaked, derived, and unterminated SSH user keys</li>
+    <li>Backdoors (unaudited user keys)</li>
+    <li>Unintended usage of user keys</li>
+    <li>Pivoting</li>
+    <li>Lack of knowledge and human errors</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Vulnerable SSH implementations</h1>
+
+  <p>
+    <img style="float: right;" src="heartbleed.svg" alt=""/>
+    <em>Guideline 1</em>: Keep your OpenSSH client/server up to date.
+  </p>
+
+  <ul>
+    <li>
+      Latest version is 8.3.
+    </li>
+
+    <li>
+      Project generally releases once or twice a year.
+    </li>
+
+    <li>
+      Since Heartbleed, the project has been more aggressive removing
+      weak crypto and features.
+    </li>
+
+    <li>
+      Also adding new features - FIDO authentication, new crypto, ...
+    </li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Improperly configured access control</h1>
+
+  <p>
+    <em>Guideline 2</em>: Don't rely on out of box configuration.
+  </p>
+
+  <ul>
+    <li>
+      Most distribution will tend to lean towards maximizing ease of
+      use instead of security.
+    </li>
+
+    <li>
+      Lots of pressure from user to "just let me connect".
+    </li>
+
+    <li>
+      Server has 87 configuration options.
+
+      <ul>
+        <li>
+          <em>Guideline 2.1</em>: Organizing options into functional areas.
+        </li>
+
+        <li>
+          <em>Guideline 2.2</em>: Decompose configuration file using
+          "Include" option.
+        </li>
+
+        <li>
+          <em>Guideline 2.3</em>: Organize options from most specific
+          to most general. Recall, first declaration wins, except for
+          "Match" option.
+        </li>
+
+        <li>
+          <em>Guideline 2.4</em>: Default to no access with relaxation
+          on "Match" option.
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Improperly configured access control</h1>
+
+  <p>
+    Extract from /etc/ssh/sshd_config
+  </p>
+
+  <pre>
+### @defgroup User Authentication @{
+
+  # @default AuthenticationMethods any
+  AuthenticationMethods="none"
+
+  # @default PubkeyAuthentication yes
+  PubkeyAuthentication="no"
+
+  ...
+###@}
+
+Match Host localhost,*.quoininc.com
+  AuthenticationMethods="publickey"
+  PubkeyAuthentication="yes"
+  </pre>
+</div>
+
+
+<div class="slide">
+  <h1>Improperly configured access control</h1>
+
+  <p>
+    <em>Guideline 3</em>: Verify and audit configuration.
+  </p>
+
+  <ul>
+    <li>sshd <code>-t</code> option to test syntax.</li>
+    <li>sshd <code>-T</code> and <code>-C</code> option to verify access.</li>
+    <li>
+      <a href="https://cisofy.com/lynis/">Lynis</a> has some basic checks.
+    </li>
+    <li>
+      <a href="https://github.com/jtesta/ssh-audit">ssh-audit</a> will
+      audit the crypto.
+    </li>
+    <li>
+      <a href="https://www.open-scap.org/">OpenSCAP</a> has direct
+      integration to NIST standards.
+    </li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Crypto</h1>
+
+  <p>
+    Lot's of focus on this but likely not as important a threat vector
+    as other configuration options.
+  </p>
+
+  <ul>
+    <li>
+      Definitely above my paygrade, I rely mostly on NIST standard and
+      <a
+      href="https://stribika.github.io/2015/01/04/secure-secure-shell.html">stribika.github.io</a>.
+    </li>
+
+    <li>
+      <em>Guideline 3</em>: Use modern crypto provided by OpenSSH.
+
+      <ul>
+        <li>
+          <em>Guideline 3.1</em>: For internal servers, specify only
+          single algorithm for each of the options.
+        </li>
+
+        <li>
+          <em>Guideline 3.2</em>: Guard against degrading to unsafe
+          algorithms
+        </li>
+
+        <li>
+          <em>Guideline 3.3</em>: Specify configuration for both
+          client and server.  algorithms
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Crypto</h1>
+
+  <p>
+    <em>Guideline 3.4</em>: Recommended algorithms
+  </p>
+
+  <dl>
+    <dt>key exchange algorithm (KEX)</dt>
+    <dd>curve25519-sha256@libssh.org</dd>
+
+    <dt>encryption algorithm (cipher)</dt>
+    <dd>chacha20-poly1305@openssh.com</dd>
+
+    <dt>message authentication code algorithms (MAC)</dt>
+    <dd>hmac-sha2-512-etm@openssh.com</dd>
+
+    <dt>host and user key algorithm</dt>
+    <dd>ssh-ed25519-cert-v01@openssh.com</dd>
+  </dl>
+
+  <p>
+    Since version 8.0, Experimental support for KEX quantum-resistant
+    algorithm with sntrup4591761x25519-sha512@tinyssh.org.
+  </p>
+</div>
+
+
+<div class="slide">
+  <h1>Authentication</h1>
+
+  <p>
+    Likely the primary attack vector. Alternative
+  </p>
+
+  <ul>
+    <li>KbdInteractiveAuthentication and PasswordAuthentication</li>
+    <li>PubkeyAuthentication</li>
+    <li>Certificate based PubkeyAuthentication</li>
+    <li>FIDO based PubkeyAuthentication</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Authentication</h1>
+
+  <p>
+    Vulnerabilities based on distribution and management of credentials.
+  </p>
+
+  <ul>
+    <li>Password based requires saving password on all servers.</li>
+    <li>Public key requires saving public half of key on all servers.</li>
+    <li>Public key have no life time or limit on how they can be used.</li>
+    <li>Difficult to manage and audit at scale.</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Authentication - certificates</h1>
+
+  <p>
+    <em>Guideline 4</em>: Use OpenSSH certificates for both host and
+    user authentication.
+  </p>
+
+  <ul>
+    <li>Available since version 5.4</li>
+    <li>Much simpler and lighter weight than X.509</li>
+    <li>Provides identify, lifetime and features.</li>
+    <li>Eliminates need to distribute any credentials to server.</li>
+    <li>Eliminates man-in-the-middle attack.</li>
+    <li>Works for both host and user keys.</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Authentication - certificates</h1>
+
+  <p>
+    Components of certificate infrastructure.
+  </p>
+
+  <ul>
+    <li>Create a Certificate Authority key to sign all certificates.</li>
+    <li>Distribute this CA key to all servers in /etc/ssh/ca_keys.</li>
+    <li>Distribute this CA key to all clients in /etc/ssh/ssh_known_hosts.</li>
+    <li>Create certificate for each user and host.</li>
+    <li>Optionally create certificate revocation file.</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Authentication - certificates</h1>
+
+  <pre>
+$ ssh-keygen -L -f .ssh/id_rsa-cert.pub 
+.ssh/id_rsa-cert.pub:
+        Type: ssh-rsa-cert-v01@openssh.com user certificate
+        Public key: RSA-CERT SHA256:0BhpclK7oIdmfv8hPf6VMn6a5dPJLalPS/SLkMH+ODg
+        Signing CA: ED25519 SHA256:XkKgUFZbGh5umwbkCGMnZ4KV9CwuShavk0/6SyjnQyU (using ssh-ed25519)
+        Key ID: "jplejacq@quoininc.com"
+        Serial: 205
+        Valid: from 2019-05-17T22:00:00 to 2021-05-16T22:01:50
+        Principals: 
+                jplejacq
+        Critical Options: (none)
+        Extensions: 
+                permit-X11-forwarding
+                permit-port-forwarding
+                permit-pty
+                permit-user-rc
+  </pre>
+</div>
+
+
+<div class="slide">
+  <h1>Authentication - certificates</h1>
+
+  <p>
+    Some features.
+  </p>
+
+  <ul>
+    <li>You no longer need a know_hosts file for your servers.</li>
+    <li>
+      Certificates can restrict the source, the commands that can
+      be executed, and the features.
+    </li>
+    <li>
+      Time scoped to limit exposure of lost keys or certificates.
+    </li>
+  </ul>
+
+  <ul>
+    <li>
+      <em>Guideline 4.1</em>: Use critical options to limit exposure for
+      service to service remote access.
+    </li>
+
+    <li>
+      <em>Guideline 4.2</em>: Establish management policy and
+      procedures for renewing and revoking certificates.
+    </li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Hardware security token</h1>
+
+  <p>
+    <img style="float: right;" src="yubico-yubikey5.jpg" alt=""/>
+    OpenSSH can use private key stored on a OpenPGP Card
+  </p>
+
+  <ul>
+    <li>Modern GnuPG gpg-agent provides most capabilities.</li>
+    <li>The GnuPG authentication subkey used as OpenSSH authentication key</li>
+    <li>Both public and private key stored on device.</li>
+    <li>Certificates not yet supported</li>
+    <li>Significantly reduces risk of compromised ssh keys.</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Hardware security token</h1>
+
+  <p>
+    Incredibly easy to setup.
+  </p>
+
+  <ul>
+    <li>Provision set of GnuPG keys to hardware token.</li>
+    <li>
+      Configure gpg-agent to emulate ssh-agent. This is default for Debian.
+    </li>
+    <li>
+      Extract public key to create certificate and/or distribute to servers.
+    </li>
+  </ul>
+
+  <p>
+    <em>Guidline 5</em>: Use hardare security token for your private
+    ssh keys.
+  </p>
+</div>
+
+
+<div class="slide">
+  <h1>Hardware security token</h1>
+
+  <pre>
+$ ssh-add -l
+3072 SHA256:0BhpclK7oIdmfv8hPf6VMn6a5dPJLalPS/SLkMH+ODg cardno:000610191628 (RSA)
+  </pre>
+</div>
+
+
+<div class="slide">
+  <h1 id="reference">References</h1>
+
+  <ul>
+    <li>
+      OpenSSH project (<a
+      href="https://www.openssh.com/">https://www.openssh.com/</a>)
+    </li>
+
+    <li>
+      NISTTR 7966 - Security of Interactive and Automated Access
+      Management Using Secure Shell (SSH) (<a
+      href="https://nvlpubs.nist.gov/nistpubs/ir/2015/NIST.IR.7966.pdfz">https://nvlpubs.nist.gov/nistpubs/ir/2015/NIST.IR.7966.pdf</a>
+    </li>
+
+    <li>
+      NIST Common Vulnerabilities and Exposures (<abbr title="Common
+      Vulnerabilities and Exposures">CVE</abbr>) related to
+      OpenSSH. (<a
+      href="https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=openssh">https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=openssh</a>
+    </li>
+
+    <li>
+      Secure Secure Shell <a
+      href="https://stribika.github.io/2015/01/04/secure-secure-shell.html">https://stribika.github.io/2015/01/04/secure-secure-shell.html</a>. One
+      of the few understandable sites describing a rational for
+      selecting a particular set of cryptographic options. A bit dated
+      at this point but still a good read.
+    </li>
+  </ul>
+</div>
+
+
+</div>
+</body>
+</html>
